@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Makro-Indikatoren lernen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..125,400..800&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EEF1F4;--surface:#FFFFFF;--surface2:#F6F8FA;--ink:#16202E;--muted:#5A6676;--line:#D5DBE2;
+  --accent:#2D4BA0;--accent-soft:#E3E9F7;--hawk:#A3312A;--hawk-soft:#F6E3E1;--dove:#1D6F72;--dove-soft:#DDF0EF;
+  --ok:#1F7A3E;--ok-soft:#E0F2E6;--bad:#A3312A;--bad-soft:#F6E3E1;
+  color-scheme:light;box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F141B;--surface:#171E28;--surface2:#1C2430;--ink:#E6EAF0;--muted:#9AA6B5;--line:#2A3442;
+    --accent:#8EA8F0;--accent-soft:#1F2A44;--hawk:#E58A7F;--hawk-soft:#3A1F1C;--dove:#62C4C1;--dove-soft:#14302F;
+    --ok:#6FCF8E;--ok-soft:#173222;--bad:#E58A7F;--bad-soft:#3A1F1C;color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F141B;--surface:#171E28;--surface2:#1C2430;--ink:#E6EAF0;--muted:#9AA6B5;--line:#2A3442;
+  --accent:#8EA8F0;--accent-soft:#1F2A44;--hawk:#E58A7F;--hawk-soft:#3A1F1C;--dove:#62C4C1;--dove-soft:#14302F;
+  --ok:#6FCF8E;--ok-soft:#173222;--bad:#E58A7F;--bad-soft:#3A1F1C;color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:17px;line-height:1.55}
+h1,h2,h3{font-family:"Archivo",system-ui,sans-serif;font-weight:700;line-height:1.15;margin:0}
+button{font:inherit;color:inherit}
+button:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.app{display:grid;grid-template-columns:270px minmax(0,1fr);max-width:1180px;margin:0 auto;min-height:100vh}
+aside{padding:28px 20px;border-right:1px solid var(--line)}
+.brand h1{font-size:22px;font-stretch:85%;letter-spacing:-.01em}
+.brand p{margin:6px 0 0;color:var(--muted);font-size:15px}
+.overall{margin:22px 0 18px;font-size:14px;color:var(--muted)}
+.bar{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin-top:6px}
+.bar>span{display:block;height:100%;background:var(--accent);border-radius:3px;transition:width .4s}
+nav{display:flex;flex-direction:column;gap:4px}
+.navbtn{display:flex;justify-content:space-between;align-items:center;gap:10px;text-align:left;padding:10px 12px;border:1px solid transparent;border-radius:8px;background:none;cursor:pointer}
+.navbtn:hover{background:var(--surface2)}
+.navbtn[aria-current="true"]{background:var(--surface);border-color:var(--line)}
+.navbtn .nm{font-weight:600}
+.badge{font-size:13px;padding:2px 8px;border-radius:10px;background:var(--surface2);color:var(--muted);white-space:nowrap}
+.badge.pass{background:var(--ok-soft);color:var(--ok)}
+.badge.fail{background:var(--bad-soft);color:var(--bad)}
+main{padding:36px 40px 80px;min-width:0}
+.cat-head h2{font-size:clamp(30px,4.4vw,46px);font-stretch:80%;letter-spacing:-.02em}
+.cat-head .lead{max-width:68ch;color:var(--muted);margin:12px 0 0;font-size:18px}
+.chain{margin:26px 0 30px;padding:18px 20px;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:0;max-width:72ch}
+.chain h3{font-size:15px;font-stretch:90%;margin-bottom:6px;color:var(--accent)}
+.chain p{margin:0}
+.list{display:flex;flex-direction:column;gap:10px;max-width:820px}
+details.ind{background:var(--surface);border:1px solid var(--line);border-radius:10px}
+details.ind summary{list-style:none;cursor:pointer;padding:16px 18px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 16px;align-items:center}
+details.ind summary::-webkit-details-marker{display:none}
+.ind .t{font-family:"Archivo",sans-serif;font-weight:700;font-size:18px;font-stretch:90%}
+.ind .s{grid-column:1/2;color:var(--muted);font-size:15px}
+.lever{grid-row:1/3;grid-column:2;display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.dir{font-size:13px;font-weight:600;padding:3px 9px;border-radius:12px;white-space:nowrap}
+.dir.hawk{background:var(--hawk-soft);color:var(--hawk)}
+.dir.dove{background:var(--dove-soft);color:var(--dove)}
+.dir.neutral{background:var(--surface2);color:var(--muted)}
+.weight{display:flex;gap:3px;align-items:center;font-size:12px;color:var(--muted)}
+.weight i{width:14px;height:5px;border-radius:2px;background:var(--line);display:inline-block}
+.weight i.on{background:var(--ink)}
+.body{padding:0 18px 18px;border-top:1px solid var(--line)}
+.body dl{margin:14px 0 0;display:grid;grid-template-columns:150px minmax(0,1fr);gap:10px 18px}
+.body dt{font-weight:600;color:var(--muted);font-size:15px}
+.body dd{margin:0}
+.cta{margin:34px 0 0;display:flex;align-items:center;gap:16px;flex-wrap:wrap;max-width:820px;padding:22px;border:1px dashed var(--line);border-radius:10px}
+.cta p{margin:0;flex:1 1 260px;color:var(--muted)}
+.btn{padding:11px 20px;border-radius:8px;border:1px solid var(--accent);background:var(--accent);color:var(--surface);font-weight:600;cursor:pointer}
+.btn.ghost{background:none;color:var(--accent)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.quiz{max-width:720px}
+.qmeta{display:flex;justify-content:space-between;color:var(--muted);font-size:14px;margin-bottom:8px}
+.qtext{font-family:"Archivo",sans-serif;font-weight:700;font-size:clamp(21px,2.6vw,27px);font-stretch:90%;margin:22px 0 20px;line-height:1.25}
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt{text-align:left;padding:14px 16px;border:1px solid var(--line);border-radius:8px;background:var(--surface);cursor:pointer;line-height:1.4}
+.opt:hover:not(:disabled){border-color:var(--accent)}
+.opt.right{border-color:var(--ok);background:var(--ok-soft)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.opt:disabled{cursor:default}
+.explain{margin-top:18px;padding:16px 18px;background:var(--surface);border:1px solid var(--line);border-radius:8px}
+.explain strong{display:block;margin-bottom:4px}
+.explain strong.ok{color:var(--ok)}
+.explain strong.no{color:var(--bad)}
+.qnav{margin-top:20px;display:flex;justify-content:flex-end;gap:10px}
+.result h2{font-size:clamp(28px,4vw,40px);font-stretch:80%}
+.score{font-family:"Archivo",sans-serif;font-size:72px;font-weight:800;font-stretch:75%;line-height:1;margin:18px 0 6px}
+.review{margin:26px 0;display:flex;flex-direction:column;gap:8px}
+.review div{padding:10px 14px;border-radius:8px;background:var(--surface);border:1px solid var(--line);font-size:15px}
+.review div.miss{border-left:4px solid var(--bad);border-radius:0}
+.review div.hit{border-left:4px solid var(--ok);border-radius:0}
+.legend{margin:16px 0 0;font-size:13px;color:var(--muted);display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center}
+@media (max-width:820px){
+  .app{grid-template-columns:1fr}
+  aside{border-right:none;border-bottom:1px solid var(--line);padding:20px 16px 14px}
+  nav{flex-direction:row;overflow-x:auto;gap:6px;padding-bottom:4px}
+  .navbtn{flex:0 0 auto}
+  main{padding:26px 16px 60px}
+  details.ind summary{grid-template-columns:1fr}
+  .lever{grid-row:auto;grid-column:1;flex-direction:row;align-items:center;justify-content:flex-start;gap:10px}
+  .body dl{grid-template-columns:1fr;gap:2px}
+  .body dd{margin-bottom:10px}
+}
+@media (prefers-reduced-motion:reduce){.bar>span{transition:none}}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside>
+    <div class="brand">
+      <h1>Makro-Indikatoren lernen</h1>
+      <p>Was die Daten aussagen und wie sie den Leitzins bewegen.</p>
+    </div>
+    <div class="overall"><span id="overallText"></span><div class="bar"><span id="overallBar" style="width:0"></span></div></div>
+    <nav id="nav" aria-label="Kategorien"></nav>
+  </aside>
+  <main id="main" tabindex="-1"></main>
+</div>
+<script>
+const DATA=[
+{id:"inflation",name:"Inflation",lead:"Preisdaten sind der direkteste Draht zum Leitzins. Liegt die Inflation über dem Ziel von 2 %, muss die Zentralbank bremsen.",chain:"Höhere Preise → Inflation über Ziel → Zentralbank hält Zinsen hoch oder erhöht → Renditen und Währung steigen. Der Markt reagiert auf die Abweichung vom Konsens, nicht auf den absoluten Wert.",
+items:[
+{t:"CPI / Core CPI",s:"Verbraucherpreise, monatlich (USA: BLS)",w:3,d:"hawk",m:"Preisveränderung eines Warenkorbs, den Haushalte kaufen. Core ohne Energie und Nahrungsmittel.",z:"Wichtigster Inflationsdatenpunkt für den Markt. Core zeigt den Trend besser, weil Energie stark schwankt. Großer Anteil: Wohnkosten (Shelter).",l:"Über Konsens → hawkish: Zinssenkungen werden nach hinten eingepreist, 2-jährige Renditen und USD steigen."},
+{t:"PPI / Core PPI",s:"Erzeugerpreise, monatlich",w:2,d:"hawk",m:"Preise, die Produzenten für ihre Güter und Dienstleistungen erhalten.",z:"Frühindikator für den CPI, weil Kosten teils an Verbraucher weitergegeben werden. Einige Komponenten fließen direkt in die PCE-Berechnung ein.",l:"Über Konsens → leicht hawkish. Stärker beachtet, wenn er nach dem CPI kommt und PCE-Prognosen verändert."},
+{t:"PCE / Core PCE",s:"Konsumausgaben-Deflator, monatlich (BEA)",w:3,d:"hawk",m:"Preisentwicklung aller Konsumausgaben, breiter gefasst als der CPI und mit wechselnden Gewichten.",z:"Das 2 %-Ziel der Fed bezieht sich auf PCE. Kommt nach CPI und PPI, deshalb ist die Überraschung oft kleiner.",l:"Über Ziel und steigend → Fed bleibt restriktiv. Für die Fed-Kommunikation die zentrale Zahl."},
+{t:"HICP (Eurozone)",s:"Harmonisierter Verbraucherpreisindex",w:3,d:"hawk",m:"Verbraucherpreise nach einheitlicher EU-Methodik. Flash-Schätzung am Monatsende.",z:"Grundlage für das 2 %-Ziel der EZB. Deutsche Länderdaten kommen vorher und geben einen Vorgeschmack.",l:"Über Konsens → EZB eher restriktiv, EUR tendenziell fester."},
+{t:"Importpreise",s:"Preise importierter Güter, monatlich",w:1,d:"hawk",m:"Preisentwicklung von Gütern aus dem Ausland, stark von Wechselkurs und Rohstoffen getrieben.",z:"Kanal, über den eine schwache Währung oder teure Rohstoffe Inflation importieren.",l:"Meist geringe Marktreaktion. Hoher Anstieg → leichter Inflationsdruck."},
+{t:"Inflationserwartungen",s:"z. B. UoM 1 Jahr und 5–10 Jahre",w:2,d:"hawk",m:"Wie viel Inflation Haushalte (Umfrage) oder Märkte (Breakevens) erwarten.",z:"Erwartungen beeinflussen Lohnforderungen und Preissetzung. Langfristige Erwartungen zeigen, ob die Zentralbank glaubwürdig ist.",l:"Steigende langfristige Erwartungen → deutlich hawkish, weil sich Inflation sonst selbst verstärken kann."}
+]},
+{id:"arbeit",name:"Arbeitsmarkt",lead:"Die Fed hat ein duales Mandat: Preisstabilität und maximale Beschäftigung. Der Arbeitsmarkt ist deshalb fast so wichtig wie die Inflation.",chain:"Starker Arbeitsmarkt → steigende Löhne → mehr Konsum und Dienstleistungsinflation → Zinsen bleiben hoch. Ein schwächelnder Arbeitsmarkt öffnet die Tür für Zinssenkungen.",
+items:[
+{t:"Non-Farm Payrolls",s:"Neue Stellen außerhalb der Landwirtschaft, erster Freitag",w:3,d:"hawk",m:"Monatliche Veränderung der Beschäftigtenzahl laut Unternehmensbefragung.",z:"Kommt zusammen mit Arbeitslosenquote und Löhnen. Revisionen der Vormonate können die Reaktion umdrehen.",l:"Über Konsens → hawkish. Deutlich darunter → Zinssenkungserwartungen steigen."},
+{t:"Arbeitslosenquote",s:"Anteil Arbeitsloser an Erwerbspersonen",w:3,d:"dove",m:"Ergebnis der Haushaltsbefragung, gleicher Release wie NFP.",z:"Direktes Maß für das Beschäftigungsmandat. Ein schneller Anstieg gilt als Rezessionssignal.",l:"Höher als erwartet → dovish. Die Richtung ist umgekehrt zu den meisten anderen Daten."},
+{t:"Average Hourly Earnings",s:"Durchschnittliche Stundenlöhne",w:2,d:"hawk",m:"Lohnwachstum pro Stunde, Monat und Jahr.",z:"Löhne treiben Dienstleistungspreise. Lohnwachstum deutlich über Produktivität plus 2 % gilt als inflationär.",l:"Über Konsens → hawkish, weil Lohn-Preis-Dynamik droht."},
+{t:"Initial Jobless Claims",s:"Erstanträge auf Arbeitslosenhilfe, jeden Donnerstag",w:2,d:"dove",m:"Wie viele Menschen sich in der Woche neu arbeitslos melden.",z:"Höchste Frequenz aller Arbeitsmarktdaten. Einzelwochen sind verrauscht, der Trend (4-Wochen-Schnitt) zählt.",l:"Anhaltend steigend → dovish, Arbeitsmarkt kühlt ab."},
+{t:"ADP Employment",s:"Private Beschäftigung, Mittwoch vor NFP",w:1,d:"hawk",m:"Beschäftigungsschätzung aus den Lohnabrechnungsdaten von ADP.",z:"Wird oft als NFP-Vorschau gehandelt, sagt NFP aber nur schwach voraus.",l:"Kurzfristige Reaktion möglich, die eigentliche Bewertung folgt mit NFP."},
+{t:"JOLTS Job Openings",s:"Offene Stellen und Kündigungen",w:2,d:"hawk",m:"Offene Stellen, Einstellungen und freiwillige Kündigungen (Quits).",z:"Viele offene Stellen pro Arbeitslosem bedeuten einen angespannten Markt. Eine hohe Quits-Rate deutet auf Lohndruck hin.",l:"Mehr offene Stellen als erwartet → leicht hawkish."}
+]},
+{id:"wachstum",name:"Wachstum und Konsum",lead:"Diese Daten zeigen, wie viel Nachfrage in der Wirtschaft steckt. Zu viel Nachfrage heizt Preise an, zu wenig signalisiert Abschwung.",chain:"Starke Nachfrage (Y = C + I + G + NX) → Kapazitäten ausgelastet → Preisdruck → Zinsen bleiben hoch. Schwaches Wachstum bei sinkender Inflation macht Senkungen wahrscheinlicher.",
+items:[
+{t:"BIP / GDP",s:"Quartalsweise, Advance, Second, Third",w:2,d:"hawk",m:"Gesamtwert aller produzierten Güter und Dienstleistungen, annualisiert.",z:"Die erste Schätzung (Advance) bewegt den Markt am stärksten. Enthält auch einen Preisindex.",l:"Über Konsens → hawkish, vor allem bei gleichzeitig hoher Inflation."},
+{t:"Retail Sales",s:"Einzelhandelsumsätze, monatlich",w:2,d:"hawk",m:"Umsätze im Einzelhandel, nominal. Control Group ohne Autos, Benzin, Baumaterial und Gastronomie.",z:"Konsum macht rund zwei Drittel des US-BIP aus. Die Control Group fließt direkt in die BIP-Berechnung ein.",l:"Über Konsens → hawkish, Nachfrage bleibt robust."},
+{t:"Industrieproduktion",s:"Output von Industrie, Bergbau, Versorgern",w:1,d:"hawk",m:"Mengenmäßige Produktion, mit Kapazitätsauslastung.",z:"Hohe Kapazitätsauslastung deutet auf Preisdruck hin. In Deutschland wichtiger als in den USA.",l:"Meist geringe Wirkung, außer bei großen Überraschungen."},
+{t:"Durable Goods Orders",s:"Aufträge für langlebige Güter",w:1,d:"hawk",m:"Neue Aufträge für Güter mit über drei Jahren Lebensdauer.",z:"Headline schwankt stark durch Flugzeugbestellungen. Core Capital Goods (ohne Rüstung und Flugzeuge) ist ein Proxy für Unternehmensinvestitionen.",l:"Starke Core-Werte → leicht hawkish, Investitionen halten trotz Zinsen."},
+{t:"Factory Orders",s:"Auftragseingänge der Industrie",w:1,d:"neutral",m:"Alle Industrieaufträge, langlebig und nicht langlebig.",z:"Ein großer Teil ist durch Durable Goods schon bekannt, daher wenig neue Information.",l:"Kaum Wirkung auf Zinserwartungen."}
+]},
+{id:"stimmung",name:"Stimmung und Umfragen",lead:"Umfragen kommen früh und zeigen Wendepunkte, bevor sie in harten Daten wie Produktion oder BIP sichtbar werden.",chain:"Bessere Stimmung → mehr Aufträge und Einstellungen in den Folgemonaten → mehr Nachfrage. Preis-Unterindizes geben zusätzlich einen frühen Blick auf Inflation.",
+items:[
+{t:"ISM Manufacturing PMI",s:"Einkaufsmanagerindex Industrie, erster Werktag",w:2,d:"hawk",m:"Diffusionsindex aus Befragung von Einkaufsmanagern. Über 50 Expansion, unter 50 Kontraktion.",z:"Unterindizes wie Prices Paid und Employment geben Hinweise auf Inflation und Arbeitsmarkt.",l:"Über Konsens → leicht hawkish. Steigende Prices Paid sind ein Inflationswarnsignal."},
+{t:"ISM Services PMI",s:"Einkaufsmanagerindex Dienstleistungen",w:2,d:"hawk",m:"Gleiche Methodik für den Dienstleistungssektor.",z:"Dienstleistungen sind der größte Teil der US-Wirtschaft, und Dienstleistungsinflation ist besonders hartnäckig.",l:"Starker Wert und hohe Preiskomponente → hawkish."},
+{t:"Flash PMIs (S&P Global)",s:"Vorläufige PMIs, um den 23. des Monats",w:2,d:"hawk",m:"Erste Einkaufsmanager-Daten zum laufenden Monat, für USA, Eurozone, UK und mehr.",z:"Die frühesten Daten des Monats überhaupt. Für EUR-Paare oft einer der wichtigsten Termine.",l:"Über Konsens → leicht hawkish für die jeweilige Zentralbank."},
+{t:"ifo / ZEW",s:"Deutsche Stimmungsindikatoren",w:1,d:"hawk",m:"ifo befragt Unternehmen zu Lage und Erwartungen. ZEW befragt Finanzanalysten zu ihren Erwartungen.",z:"Frühindikatoren für Deutschland und damit die Eurozone. ZEW kommt früher im Monat.",l:"Wirkung auf die EZB gering, eher Einfluss auf EUR und DAX."},
+{t:"UoM Consumer Sentiment",s:"Verbraucherstimmung Uni Michigan",w:1,d:"hawk",m:"Befragung von Haushalten zu Finanzlage und Wirtschaftsaussichten.",z:"Enthält die Inflationserwartungen der Haushalte, die oft wichtiger sind als die Stimmung selbst.",l:"Stimmung allein bewegt wenig. Steigende Inflationserwartungen → hawkish."},
+{t:"CB Consumer Confidence",s:"Conference Board Verbrauchervertrauen",w:1,d:"hawk",m:"Haushaltsbefragung mit Fokus auf Arbeitsmarktwahrnehmung.",z:"Das Labor Differential (Jobs reichlich minus schwer zu finden) korreliert mit der Arbeitslosenquote.",l:"Geringe direkte Wirkung auf Zinserwartungen."}
+]},
+{id:"immo",name:"Immobilien und Außenhandel",lead:"Immobilien reagieren als einer der ersten Sektoren auf Zinsänderungen. Außenhandelsdaten wirken eher indirekt über BIP und Währung.",chain:"Höhere Zinsen → teurere Hypotheken → weniger Baubeginne und Verkäufe. Diese Daten zeigen vor allem, ob die Geldpolitik wirkt, statt sie direkt zu treiben.",
+items:[
+{t:"Housing Starts",s:"Baubeginne neuer Wohneinheiten",w:1,d:"hawk",m:"Wie viele neue Wohnbauten im Monat begonnen wurden, annualisiert.",z:"Sehr zinssensitiv. Wohnungsbau ist ein früher Konjunkturindikator.",l:"Geringe direkte Wirkung. Starker Rückgang zeigt, dass die Straffung greift."},
+{t:"Building Permits",s:"Baugenehmigungen",w:1,d:"hawk",m:"Genehmigte Wohneinheiten, vor dem eigentlichen Baubeginn.",z:"Läuft den Housing Starts voraus, deshalb der bessere Frühindikator.",l:"Geringe direkte Wirkung auf den Leitzins."},
+{t:"Existing Home Sales",s:"Verkäufe bestehender Häuser",w:1,d:"neutral",m:"Abgeschlossene Verkäufe von Bestandsimmobilien.",z:"Größter Teil des Immobilienmarkts. Hohe Zinsen bremsen Verkäufe, weil Eigentümer günstige alte Kredite nicht aufgeben wollen.",l:"Kaum Wirkung, eher Bestätigung der Transmission."},
+{t:"New Home Sales",s:"Verkäufe von Neubauten",w:1,d:"neutral",m:"Verkaufte neue Einfamilienhäuser, gezählt bei Vertragsabschluss.",z:"Volatil und stark revidiert. Bauträger können mit Zinsvergünstigungen gegensteuern.",l:"Kaum Wirkung auf Zinserwartungen."},
+{t:"Handelsbilanz",s:"Exporte minus Importe, monatlich",w:1,d:"neutral",m:"Saldo des Waren- und Dienstleistungshandels.",z:"Nettoexporte sind Teil des BIP. Kann BIP-Schätzungen verändern und wirkt auf die Währung.",l:"Sehr geringe direkte Wirkung auf den Leitzins."},
+{t:"Leistungsbilanz",s:"Quartalsweise",w:1,d:"neutral",m:"Handelsbilanz plus Einkommen und Transfers mit dem Ausland.",z:"Langfristig relevant für Währungen, weil Defizite durch Kapitalzuflüsse finanziert werden müssen.",l:"Praktisch kein kurzfristiger Einfluss auf den Leitzins."}
+]},
+{id:"zb",name:"Zentralbank",lead:"Hier entsteht der Leitzins tatsächlich. Alle anderen Daten werden durch die Brille der Zentralbank gelesen.",chain:"Daten → Erwartungen der Notenbanker → Kommunikation → Marktpreise. Bewegung entsteht, wenn die Zentralbank anders handelt oder spricht, als Fed Funds Futures es eingepreist haben.",
+items:[
+{t:"Zinsentscheid",s:"Fed acht Mal pro Jahr, EZB ähnlich",w:3,d:"neutral",m:"Festlegung des Leitzinses, bei der Fed das Zielband der Fed Funds Rate.",z:"Meist vorher weitgehend eingepreist. Die Überraschung steckt oft in Statement und Ausblick.",l:"Höher als eingepreist → hawkish, niedriger → dovish."},
+{t:"Statement und Pressekonferenz",s:"Direkt nach dem Entscheid",w:3,d:"neutral",m:"Schriftliche Begründung und Fragen an Fed-Chair bzw. EZB-Präsidentin.",z:"Kleine Formulierungsänderungen im Statement werden Wort für Wort verglichen. In der PK entstehen oft die größten Bewegungen.",l:"Signal für die nächsten Schritte, die Forward Guidance."},
+{t:"Projektionen / Dot Plot",s:"Fed, vier Mal pro Jahr",w:3,d:"neutral",m:"Prognosen zu Wachstum, Inflation, Arbeitslosigkeit und der Zinspfad jedes FOMC-Mitglieds als Punkt.",z:"Zeigt, wie viele Senkungen oder Erhöhungen die Mitglieder erwarten, im Vergleich zur Markterwartung.",l:"Mehr Erhöhungen oder weniger Senkungen als eingepreist → hawkish."},
+{t:"FOMC-/EZB-Protokolle",s:"Minutes, etwa drei Wochen nach der Sitzung",w:2,d:"neutral",m:"Ausführliche Zusammenfassung der Diskussion in der Sitzung.",z:"Zeigt die Bandbreite der Meinungen und ob eine Mehrheit zu einer Richtung tendiert.",l:"Meist moderate Wirkung, außer sie widersprechen dem Ton der Pressekonferenz."},
+{t:"Reden der Notenbanker",s:"Laufend, besonders Chair und Präsidentin",w:2,d:"neutral",m:"Auftritte einzelner Mitglieder zwischen den Sitzungen.",z:"Werden genutzt, um Erwartungen vorab zu steuern. Gewicht hängt davon ab, wer spricht und ob die Person stimmberechtigt ist.",l:"Hawkishe Aussagen → Renditen steigen, dovishe → fallen."}
+]}
+];
+const QUIZ={
+inflation:[
+{q:"Warum schaut die Fed besonders auf Core PCE statt auf den Headline-CPI?",o:["Das 2 %-Ziel bezieht sich auf PCE, und Core filtert schwankende Energie- und Nahrungsmittelpreise heraus","Der CPI wird nur quartalsweise veröffentlicht","PCE enthält keine Dienstleistungen und ist dadurch stabiler","Der CPI misst nur Erzeugerpreise"],a:0,e:"Die Fed hat ihr Inflationsziel auf PCE festgelegt. Die Kernrate zeigt den zugrunde liegenden Trend besser, weil Energie und Nahrungsmittel stark schwanken."},
+{q:"Core CPI kommt 0,2 Prozentpunkte über dem Konsens. Was ist die typische Marktreaktion?",o:["2-jährige Treasury-Renditen fallen","2-jährige Renditen und der USD steigen","Es passiert nichts, weil nur die Headline zählt","Die Fed senkt sofort den Leitzins"],a:1,e:"Höhere Inflation macht Zinssenkungen unwahrscheinlicher. Das kurze Ende der Zinskurve reagiert am stärksten, der Dollar wird attraktiver."},
+{q:"Welcher Indikator gilt als Frühindikator für die Verbraucherpreise?",o:["Handelsbilanz","JOLTS","PPI","Existing Home Sales"],a:2,e:"Der PPI erfasst Preise auf Erzeugerebene. Steigende Kosten werden häufig verzögert an Verbraucher weitergegeben."},
+{q:"Für welche Zentralbank ist der HICP die zentrale Inflationskennzahl?",o:["Fed","EZB","Bank of England","Bank of Japan"],a:1,e:"Das 2 %-Ziel der EZB bezieht sich auf den harmonisierten Verbraucherpreisindex der Eurozone."},
+{q:"Warum sind steigende langfristige Inflationserwartungen für Zentralbanken besonders alarmierend?",o:["Weil sie die Handelsbilanz verschlechtern","Weil sie Hypothekenzinsen direkt senken","Weil sie sich über Lohnforderungen und Preissetzung selbst erfüllen können","Weil sie in den CPI eingerechnet werden"],a:2,e:"Wenn Unternehmen und Beschäftigte dauerhaft höhere Inflation erwarten, passen sie Preise und Löhne an. Die Zentralbank verliert dann an Glaubwürdigkeit."}
+],
+arbeit:[
+{q:"Welche zwei Ziele umfasst das duale Mandat der Fed?",o:["Stabiler Dollar und ausgeglichener Haushalt","Preisstabilität und maximale Beschäftigung","Hohes Wachstum und niedrige Steuern","Stabile Aktienmärkte und niedrige Zinsen"],a:1,e:"Deshalb sind Arbeitsmarktdaten für die Fed fast so wichtig wie Inflationsdaten."},
+{q:"NFP liegt deutlich über Konsens und die Arbeitslosenquote sinkt. Wie wirkt das auf die Zinserwartungen?",o:["Dovish, Senkungen werden wahrscheinlicher","Neutral, weil sich beide Effekte aufheben","Hawkish, Senkungen werden nach hinten verschoben","Kein Effekt, Arbeitsmarktdaten sind irrelevant"],a:2,e:"Ein starker Arbeitsmarkt spricht für anhaltenden Lohn- und Nachfragedruck. Die Fed hat weniger Grund, die Zinsen zu senken."},
+{q:"Warum ist Average Hourly Earnings inflationsrelevant?",o:["Lohnwachstum treibt vor allem Dienstleistungspreise","Es misst die Preise von Importgütern","Es fließt direkt in den PPI ein","Es bestimmt die Höhe der Arbeitslosenhilfe"],a:0,e:"Bei Dienstleistungen sind Löhne der größte Kostenblock. Starkes Lohnwachstum hält die Dienstleistungsinflation hoch."},
+{q:"Die Initial Jobless Claims steigen mehrere Wochen in Folge deutlich. Was folgt daraus?",o:["Hawkish, weil mehr Menschen Geld bekommen","Dovish, der Arbeitsmarkt kühlt ab","Nichts, wöchentliche Daten werden ignoriert","Die Inflation steigt automatisch"],a:1,e:"Ein anhaltender Anstieg zeigt mehr Entlassungen. Einzelne Wochen sind verrauscht, ein Trend ist aber ein frühes Abkühlungssignal."},
+{q:"Was gilt für den ADP-Bericht?",o:["Er ist die offizielle Arbeitsmarktstatistik der Regierung","Er sagt NFP nur schwach voraus","Er enthält die Arbeitslosenquote","Er erscheint nach dem NFP"],a:1,e:"ADP basiert auf Lohnabrechnungsdaten eines privaten Anbieters und weicht oft deutlich vom offiziellen NFP ab."}
+],
+wachstum:[
+{q:"Welche BIP-Schätzung bewegt den Markt typischerweise am stärksten?",o:["Advance (erste Schätzung)","Second Estimate","Third Estimate","Die jährliche Revision"],a:0,e:"Die erste Schätzung enthält die meiste neue Information. Spätere Schätzungen revidieren meist nur leicht."},
+{q:"Was ist die Retail Sales Control Group?",o:["Nur Online-Umsätze","Umsätze ohne Autos, Benzin, Baumaterial und Gastronomie, die direkt ins BIP einfließen","Umsätze, die von der Fed kontrolliert werden","Die Umsätze der 100 größten Händler"],a:1,e:"Die Control Group entfernt volatile Komponenten und wird für die Berechnung des Konsums im BIP genutzt."},
+{q:"Wofür gelten Core Capital Goods Orders als Proxy?",o:["Konsumausgaben","Staatsausgaben","Unternehmensinvestitionen","Exporte"],a:2,e:"Aufträge für Investitionsgüter ohne Rüstung und Flugzeuge zeigen, wie viel Unternehmen in Ausrüstung investieren."},
+{q:"Das Wachstum überrascht stark nach oben, während die Inflation über Ziel liegt. Was erwartet der Markt eher?",o:["Schnellere Zinssenkungen","Länger hohe Zinsen","Sofortige Wiederaufnahme von Anleihekäufen","Eine Abwertung des Leitzinses auf null"],a:1,e:"Robuste Nachfrage bei hoher Inflation gibt der Zentralbank keinen Grund zu lockern."},
+{q:"Etwa welchen Anteil hat der private Konsum am US-BIP?",o:["Rund 20 %","Rund 40 %","Rund zwei Drittel","Rund 95 %"],a:2,e:"Deshalb sind Konsumdaten wie Retail Sales für die US-Konjunktur so wichtig."}
+],
+stimmung:[
+{q:"Welcher Wert trennt beim ISM PMI Expansion von Kontraktion?",o:["0","50","100","2"],a:1,e:"Der PMI ist ein Diffusionsindex. Über 50 berichten mehr Unternehmen von Verbesserung als von Verschlechterung."},
+{q:"Warum achten Trader beim ISM besonders auf den Unterindex Prices Paid?",o:["Er zeigt Inflationsdruck früh an","Er misst die Aktienkurse der Firmen","Er bestimmt den Leitzins direkt","Er erfasst nur Importe"],a:0,e:"Steigende Einkaufspreise der Unternehmen tauchen oft später in PPI und CPI auf."},
+{q:"Warum sind die Flash PMIs so marktrelevant?",o:["Sie sind die ersten Daten zum laufenden Monat","Sie werden von der Fed selbst erhoben","Sie werden nie revidiert","Sie ersetzen das BIP"],a:0,e:"Sie kommen noch vor Monatsende und geben den frühesten Blick auf die aktuelle Konjunktur."},
+{q:"Wen befragt der ZEW-Index?",o:["Verbraucher","Unternehmen im Einzelhandel","Finanzanalysten und institutionelle Anleger","Notenbanker"],a:2,e:"ZEW misst die Erwartungen von Finanzmarktexperten. Der ifo befragt dagegen Unternehmen."},
+{q:"Welcher Teil des UoM-Berichts ist für die Zinserwartungen oft wichtiger als die Stimmung selbst?",o:["Die Inflationserwartungen der Haushalte","Die Zahl der Befragten","Die Sparquote","Die Hauspreise"],a:0,e:"Steigende Inflationserwartungen können hawkish wirken, auch wenn die Stimmung selbst kaum bewegt."}
+],
+immo:[
+{q:"Warum gelten Building Permits als besserer Frühindikator als Housing Starts?",o:["Genehmigungen kommen vor dem Baubeginn","Sie werden täglich veröffentlicht","Sie enthalten auch Gewerbeimmobilien","Sie werden nie revidiert"],a:0,e:"Ohne Genehmigung kein Bau. Genehmigungen zeigen also, was in den nächsten Monaten begonnen wird."},
+{q:"Warum reagiert der Immobilienmarkt so stark auf Zinsänderungen?",o:["Häuser werden meist kreditfinanziert, und Hypothekenzinsen hängen an langen Renditen","Weil die Fed Häuser kauft","Weil Immobilien im CPI nicht vorkommen","Weil Mieten gesetzlich an den Leitzins gekoppelt sind"],a:0,e:"Steigen die Zinsen, steigt die monatliche Rate deutlich. Nachfrage und Neubau gehen zurück."},
+{q:"Wie hängen Wohnkosten und Inflation zusammen?",o:["Gar nicht","Shelter ist ein großer CPI-Bestandteil und reagiert mit Verzögerung","Nur über die Handelsbilanz","Wohnkosten senken immer die Inflation"],a:1,e:"Wohnkosten machen rund ein Drittel des CPI aus. Weil Mietverträge langsam erneuert werden, wirken Veränderungen erst später."},
+{q:"Wie stark wirkt die Handelsbilanz direkt auf den Leitzins?",o:["Sehr stark, sie ist der wichtigste Indikator","Kaum, eher indirekt über BIP und Währung","Sie bestimmt den Dot Plot","Sie ersetzt den CPI"],a:1,e:"Nettoexporte sind Teil des BIP und beeinflussen den Wechselkurs. Direkt reagiert die Zentralbank selten darauf."},
+{q:"Nach starken Zinserhöhungen brechen die Housing Starts ein. Was sagt das aus?",o:["Die Transmission der Geldpolitik wirkt","Die Inflation steigt sicher weiter","Die Zentralbank muss die Zinsen weiter erhöhen","Die Daten sind fehlerhaft"],a:0,e:"Immobilien gehören zu den ersten Sektoren, in denen höhere Zinsen sichtbar werden."}
+],
+zb:[
+{q:"Die Fed erhöht wie erwartet um 25 Basispunkte, signalisiert aber eine Pause. Wie reagiert der Markt eher?",o:["Hawkish, weil sie erhöht hat","Dovish, Renditen fallen eher","Gar nicht, weil die Erhöhung erwartet war","Der Dollar steigt immer bei Erhöhungen"],a:1,e:"Die Erhöhung war eingepreist. Neue Information ist das Pausensignal, und das ist dovish."},
+{q:"Was zeigt der Dot Plot?",o:["Die Zinsprojektionen der einzelnen FOMC-Mitglieder","Die tägliche Fed Funds Rate","Die Anleihekäufe der Fed","Die Inflationsrate pro Bundesstaat"],a:0,e:"Jeder Punkt ist die Einschätzung eines Mitglieds zum angemessenen Leitzins am Jahresende."},
+{q:"Wann erscheinen die FOMC Minutes?",o:["Während der Sitzung","Direkt nach dem Zinsentscheid","Etwa drei Wochen nach der Sitzung","Einmal im Jahr"],a:2,e:"Die Protokolle kommen mit Verzögerung und zeigen die Diskussion im Detail."},
+{q:"Was bedeutet hawkish?",o:["Neigung zu lockerer Geldpolitik","Neigung zu straffer Geldpolitik und höheren Zinsen","Neutral, keine Tendenz","Fokus auf Wechselkurse"],a:1,e:"Falken (Hawks) priorisieren die Inflationsbekämpfung, Tauben (Doves) eher Wachstum und Beschäftigung."},
+{q:"Wo sieht man, welche Zinsentscheidung der Markt für die nächste Fed-Sitzung einpreist?",o:["In der Handelsbilanz","In Fed Funds Futures, z. B. über das CME FedWatch Tool","Im ISM Services PMI","In den Existing Home Sales"],a:1,e:"Aus den Futures-Preisen lassen sich Wahrscheinlichkeiten für jede Zinsentscheidung ableiten."}
+]};
+const PASS=0.8;
+const KEY="makro-lernen-v1";
+let scores={};
+try{const raw=localStorage.getItem(KEY);if(raw)scores=JSON.parse(raw)||{}}catch(e){scores={}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(scores))}catch(e){}}
+let current=DATA[0].id;
+let quizState=null;
+const main=document.getElementById("main");
+function esc(s){return s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+function badgeFor(id){
+  const s=scores[id];const n=QUIZ[id].length;
+  if(s==null)return '<span class="badge">'+n+' Fragen</span>';
+  const pass=s/n>=PASS;
+  return '<span class="badge '+(pass?"pass":"fail")+'">'+s+'/'+n+'</span>';
+}
+function renderNav(){
+  const nav=document.getElementById("nav");
+  nav.innerHTML=DATA.map(c=>'<button class="navbtn" data-id="'+c.id+'" aria-current="'+(c.id===current)+'"><span class="nm">'+esc(c.name)+'</span>'+badgeFor(c.id)+'</button>').join("");
+  nav.querySelectorAll(".navbtn").forEach(b=>b.addEventListener("click",()=>{current=b.dataset.id;quizState=null;render();main.focus({preventScroll:true});window.scrollTo({top:0})}));
+  const passed=DATA.filter(c=>scores[c.id]!=null&&scores[c.id]/QUIZ[c.id].length>=PASS).length;
+  document.getElementById("overallText").textContent=passed+" von "+DATA.length+" Tests bestanden";
+  document.getElementById("overallBar").style.width=(passed/DATA.length*100)+"%";
+}
+function dirLabel(d){
+  if(d==="hawk")return '<span class="dir hawk">Höher als erwartet → Zinsen eher ↑</span>';
+  if(d==="dove")return '<span class="dir dove">Höher als erwartet → Zinsen eher ↓</span>';
+  return '<span class="dir neutral">Wirkung je nach Inhalt</span>';
+}
+function weight(w){
+  let s='<span class="weight" aria-label="Einfluss auf den Leitzins: '+w+' von 3">';
+  for(let i=1;i<=3;i++)s+='<i class="'+(i<=w?"on":"")+'"></i>';
+  return s+'</span>';
+}
+function renderCategory(){
+  const c=DATA.find(x=>x.id===current);
+  const idx=DATA.indexOf(c);
+  main.innerHTML='<div class="cat-head"><h2>'+esc(c.name)+'</h2><p class="lead">'+esc(c.lead)+'</p></div>'+
+  '<div class="chain"><h3>Der Weg zum Leitzins</h3><p>'+esc(c.chain)+'</p></div>'+
+  '<div class="list">'+c.items.map(it=>'<details class="ind"><summary><span class="t">'+esc(it.t)+'</span><span class="s">'+esc(it.s)+'</span><span class="lever">'+dirLabel(it.d)+weight(it.w)+'</span></summary><div class="body"><dl><dt>Was es misst</dt><dd>'+esc(it.m)+'</dd><dt>Zusammenhang</dt><dd>'+esc(it.z)+'</dd><dt>Wirkung auf Leitzins</dt><dd>'+esc(it.l)+'</dd></dl></div></details>').join("")+'</div>'+
+  '<p class="legend"><span>Balken = typischer Einfluss auf die Zinserwartungen (1 bis 3)</span></p>'+
+  '<div class="cta"><p>'+(idx+1)+' von '+DATA.length+'. Wenn du alle Indikatoren durchgegangen bist, prüf dein Wissen mit '+QUIZ[c.id].length+' Fragen. Ab 80 % gilt der Test als bestanden.</p><button class="btn" id="startQuiz">Test starten</button></div>';
+  document.getElementById("startQuiz").addEventListener("click",()=>{quizState={i:0,answers:[]};render();window.scrollTo({top:0})});
+}
+function renderQuiz(){
+  const c=DATA.find(x=>x.id===current);
+  const qs=QUIZ[current];
+  const st=quizState;
+  if(st.i>=qs.length)return renderResult();
+  const q=qs[st.i];
+  const answered=st.answers.length>st.i;
+  const pick=answered?st.answers[st.i]:null;
+  main.innerHTML='<div class="quiz"><div class="qmeta"><span>Test: '+esc(c.name)+'</span><span>Frage '+(st.i+1)+' von '+qs.length+'</span></div><div class="bar"><span style="width:'+(st.i/qs.length*100)+'%"></span></div>'+
+  '<p class="qtext">'+esc(q.q)+'</p><div class="opts" role="group" aria-label="Antworten">'+
+  q.o.map((o,k)=>{let cls="opt";if(answered){if(k===q.a)cls+=" right";else if(k===pick)cls+=" wrong"}return '<button class="'+cls+'" data-k="'+k+'"'+(answered?" disabled":"")+'>'+esc(o)+'</button>'}).join("")+'</div>'+
+  (answered?'<div class="explain" role="status"><strong class="'+(pick===q.a?"ok":"no")+'">'+(pick===q.a?"Richtig.":"Nicht ganz.")+'</strong>'+esc(q.e)+'</div><div class="qnav"><button class="btn" id="next">'+(st.i+1<qs.length?"Nächste Frage":"Ergebnis anzeigen")+'</button></div>':'<div class="qnav"><button class="btn ghost" id="cancel">Test abbrechen</button></div>')+'</div>';
+  main.querySelectorAll(".opt").forEach(b=>b.addEventListener("click",()=>{st.answers[st.i]=Number(b.dataset.k);render();const n=document.getElementById("next");if(n)n.focus({preventScroll:true})}));
+  const n=document.getElementById("next");if(n)n.addEventListener("click",()=>{st.i++;render()});
+  const x=document.getElementById("cancel");if(x)x.addEventListener("click",()=>{quizState=null;render()});
+}
+function renderResult(){
+  const c=DATA.find(x=>x.id===current);
+  const qs=QUIZ[current];
+  const right=quizState.answers.filter((a,k)=>a===qs[k].a).length;
+  if(!quizState.saved){scores[current]=Math.max(right,scores[current]??0);quizState.saved=true;save();renderNav()}
+  const pass=right/qs.length>=PASS;
+  const idx=DATA.findIndex(x=>x.id===current);
+  const nextCat=DATA[idx+1];
+  main.innerHTML='<div class="quiz result"><h2>'+(pass?"Bestanden":"Noch nicht bestanden")+'</h2><div class="score">'+right+'/'+qs.length+'</div><p style="color:var(--muted);margin:0">'+(pass?"Du hast die Kategorie "+esc(c.name)+" verstanden.":"Schau dir die markierten Fragen an und geh die Indikatoren noch einmal durch.")+'</p>'+
+  '<div class="review">'+qs.map((q,k)=>{const ok=quizState.answers[k]===q.a;return '<div class="'+(ok?"hit":"miss")+'">'+esc(q.q)+(ok?"":'<br><span style="color:var(--muted)">Richtig: '+esc(q.o[q.a])+'</span>')+'</div>'}).join("")+'</div>'+
+  '<div class="qnav" style="justify-content:flex-start;flex-wrap:wrap"><button class="btn ghost" id="again">Test wiederholen</button><button class="btn ghost" id="back">Zurück zu den Indikatoren</button>'+(nextCat?'<button class="btn" id="nextCat">Weiter zu '+esc(nextCat.name)+'</button>':'')+'</div></div>';
+  document.getElementById("again").addEventListener("click",()=>{quizState={i:0,answers:[]};render()});
+  document.getElementById("back").addEventListener("click",()=>{quizState=null;render()});
+  const nc=document.getElementById("nextCat");if(nc)nc.addEventListener("click",()=>{current=nextCat.id;quizState=null;render();window.scrollTo({top:0})});
+}
+function render(){renderNav();if(quizState)renderQuiz();else renderCategory()}
+render();
+</script>
+</body>
+</html>
